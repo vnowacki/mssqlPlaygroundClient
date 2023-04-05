@@ -1,3 +1,3 @@
-# FRONTEND for mssql and DHTMLX widgets playground
+# CLIENT for mssql and DHTMLX widgets playground
 
-Node Server + React App
+Node HTTP Server
