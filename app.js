@@ -8,8 +8,19 @@ const port = 8080
 const server = http.createServer((request, response) => {
     try {
         let requestUrl = url.parse(request.url)
-        let file = (requestUrl.pathname != '/') ? requestUrl.pathname : 'index.html'
-        let fsPath = baseDirectory+path.normalize(file)
+        let file = null
+        switch(requestUrl.pathname) {
+          case '/users':
+               file = './pages/users/users.html'
+               break
+          case '/login':
+               file = './pages/login/login.html'
+               break
+          default:
+               file = (requestUrl.pathname != '/') ? requestUrl.pathname : 'index.html'
+               break
+        }
+        let fsPath = baseDirectory + path.normalize(file)
 
         let fileStream = fs.createReadStream(fsPath)
         fileStream.pipe(response)
