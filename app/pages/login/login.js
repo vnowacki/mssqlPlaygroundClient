@@ -49,12 +49,25 @@ form.events.on("click", function (id) {
         .then(response => response.json())
         .then(data => {
             if(data.response == 'error') {
-                alert('nieprawidłowy login lub hasło')
+                dhx.alert({
+                    header: "Błąd",
+                    text: "Nieprawidłowy login lub hasło",
+                    buttonsAlignment: "center",
+                    buttons: ["ok"],
+                });
             } else {
-                window.localStorage.setItem('token', data.accessToken)
-                window.localStorage.setItem('refreshToken', data.refreshToken)
+                window.sessionStorage.setItem('token', data.accessToken)
+                window.sessionStorage.setItem('refreshToken', data.refreshToken)
+                window.location.href = '/'
             }
         })
-        .catch(err => console.log(err))
+        .catch(err => {
+            dhx.alert({
+                header: "Błąd",
+                text: `Kod błędu: ${err}`,
+                buttonsAlignment: "center",
+                buttons: ["ok"],
+            });
+        })
     }
 })
