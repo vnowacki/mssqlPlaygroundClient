@@ -98,14 +98,21 @@ form.events.on("click", function (id) {
             if(data.response == 'error') {
                 dhx.alert({
                     header: "Błąd",
-                    text: "Nie udało się zapisać danych",
+                    text: "Nie udało się zapisać danych.",
                     buttonsAlignment: "center",
                     buttons: ["ok"],
                 });
             } else if(data.response == 'userExists') {
                 dhx.alert({
-                    header: "Błąd",
-                    text: "Istnieje już użytkownik o podanej nazwie",
+                    header: "Błąd: nazwa jest zajęta!",
+                    text: "Istnieje już użytkownik o podanej nazwie.",
+                    buttonsAlignment: "center",
+                    buttons: ["ok"],
+                });
+            } else if(data.response == 'accessDenied') {
+                dhx.alert({
+                    header: "Błąd: brak uprawnień!",
+                    text: "Posiadane uprawnienia nie są wystarczające do wykonania tej operacji.",
                     buttonsAlignment: "center",
                     buttons: ["ok"],
                 });

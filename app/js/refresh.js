@@ -15,8 +15,8 @@ const refresh = () => {
             window.sessionStorage.setItem('token', data.accessToken)
             location.reload()
         })
-        .catch(err => {
-            if(err == 'Error: 401' || err == 'Error: 403') window.location.href = '/login'
+        .catch(() => {
+            window.location.href = '/login'
         })
 }
 
