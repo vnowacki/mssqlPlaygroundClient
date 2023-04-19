@@ -55,6 +55,16 @@ const config = {
             successMessage: "Poprawne",
         },
         {
+            name: "permLevel",
+            type: "checkbox",
+            text: "Administrator",
+            label: "Uprawnienia",
+            labelWidth: 140,
+            labelPosition: "top",
+            helpMessage: "Uprawnienia administratora pozwalają na zarządzanie kontami użytkowników.",
+            value: "admin",
+        },
+        {
             align: "end",
             cols: [
                 {
