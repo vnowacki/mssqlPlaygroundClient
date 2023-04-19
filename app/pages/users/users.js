@@ -109,6 +109,7 @@ fetch('http://localhost:4000/users',
 				{ minWidth: 200, id: "name", header: [{ text: "Imię" }] },
 				{ minWidth: 200, id: "surname", header: [{ text: "Nazwisko" }] },
                 { minWidth: 200, id: "username", header: [{ text: "Nazwa użytkownika" }] },
+                { minWidth: 100, id: "admin", header: [{ text: "Admin" }], type: "boolean" },
                 { minWidth: 200, id: "date_logged", header: [{ text: "Ostatnie logowanie" }] },
                 { minWidth: 200, id: "date_created", header: [{ text: "Data utworzenia konta" }], type: "date", format: "%d/%m/%Y" }
 			],
@@ -129,6 +130,7 @@ fetch('http://localhost:4000/users',
             if(column.id == 'date_logged' || column.id == 'date_created') return false
         })
         grid.events.on("afterEditEnd", (value, row, column) => {
+            row.permLevel = (row.admin) ? 'admin' : 'read'
             fetch(`http://localhost:4000/users/${row.id}`, {
                     method: "PATCH",
                     headers: {
@@ -155,7 +157,16 @@ fetch('http://localhost:4000/users',
                             buttonsAlignment: "center",
                             buttons: ["ok"],
                         })
+                    } else if(data.response == 'loggedUserPermRevoke') {
+                        grid.data.update(row.id,{[column.id]:[oldValue]})
+                        dhx.alert({
+                            header: "Błąd: odebranie uprawnień!",
+                            text: "Nie można odebrać uprawnień gdy użytkownik jest zalogowany.",
+                            buttonsAlignment: "center",
+                            buttons: ["ok"],
+                        })
                     } else if(data.response == 'lastAdmin') {
+                        grid.data.update(row.id,{[column.id]:[oldValue]})
                         dhx.alert({
                             header: "Błąd: ostatni administrator!",
                             text: "Nie można zmienić uprawnień ponieważ jest to ostatnie konto z uprawnieniami administracyjnymi.",
