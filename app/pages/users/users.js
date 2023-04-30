@@ -1,7 +1,8 @@
 const token = window.sessionStorage.getItem('token') ?? ''
 import { refresh } from '/js/refresh.js'
+import { toolbarInit } from '/components/toolbar.js'
 
-const data = [
+const toolbar_config = [
     {
         id: "home",
         icon: "dxi dxi-arrow-left",
@@ -38,58 +39,9 @@ const data = [
 ]
   
 const toolbar = new dhx.Toolbar("toolbar", {
-    css:"dhx_widget--bordered"
+    css:"dhx_widget--bordered", data: toolbar_config
 })
-toolbar.data.parse(data)
-
-fetch('http://localhost:4000/users/info', 
-    {
-        method: "GET",
-        headers: {
-            "Content-Type" : "application/json",
-            "Authorization": `Bearer ${token}`
-        }
-    })
-    .then(response => {
-        if(!response.ok) throw new Error(response.status)
-        return response.json()
-    })
-    .then(response => {
-        toolbar.data.update("user", {
-            value: `${response.name} ${response.surname}`
-        })
-        toolbar.data.update("lastLogged", {
-            value: response.date_logged
-        })
-    })
-    .catch(err => console.log(err))
-
-toolbar.events.on("click", (id) => {
-    if(id == 'logout') {
-        fetch('http://localhost:4000/auth', {
-                method: 'delete',
-                headers: {
-                    "Content-Type" : "application/json"
-                },
-                body: JSON.stringify({ token: window.sessionStorage.getItem('refreshToken') })
-            })
-            .then(response => {
-                if(response.status == 204) {
-                    window.sessionStorage.clear()
-                    window.location.href = '/login'
-                }
-            })
-            .catch(err => {
-                dhx.alert({
-                    header: "Błąd",
-                    text: `Wylogowanie nie powiodło się, kod błędu: ${err}`,
-                    buttonsAlignment: "center",
-                    buttons: ["ok"],
-                })
-            })
-    }
-    if(id == 'home') window.location.href = '/'
-})
+toolbarInit(toolbar)
 
 fetch('http://localhost:4000/users', 
     {
@@ -141,7 +93,7 @@ fetch('http://localhost:4000/users',
                 })
                 .then(response => response.json())
                 .then(data => {
-                    if(data.response == 'userExists') {
+                    if(data.status == 'userExists') {
                         grid.data.update(row.id,{[column.id]:[oldValue]})
                         dhx.alert({
                             header: "Błąd",
@@ -149,7 +101,7 @@ fetch('http://localhost:4000/users',
                             buttonsAlignment: "center",
                             buttons: ["ok"],
                         })
-                    } else if(data.response == 'accessDenied') {
+                    } else if(data.status == 'accessDenied') {
                         grid.data.update(row.id,{[column.id]:[oldValue]})
                         dhx.alert({
                             header: "Błąd: brak uprawnień!",
@@ -157,7 +109,7 @@ fetch('http://localhost:4000/users',
                             buttonsAlignment: "center",
                             buttons: ["ok"],
                         })
-                    } else if(data.response == 'loggedUserPermRevoke') {
+                    } else if(data.status == 'loggedUserPermRevoke') {
                         grid.data.update(row.id,{[column.id]:[oldValue]})
                         dhx.alert({
                             header: "Błąd: odebranie uprawnień!",
@@ -165,7 +117,7 @@ fetch('http://localhost:4000/users',
                             buttonsAlignment: "center",
                             buttons: ["ok"],
                         })
-                    } else if(data.response == 'lastAdmin') {
+                    } else if(data.status == 'lastAdmin') {
                         grid.data.update(row.id,{[column.id]:[oldValue]})
                         dhx.alert({
                             header: "Błąd: ostatni administrator!",
@@ -173,7 +125,7 @@ fetch('http://localhost:4000/users',
                             buttonsAlignment: "center",
                             buttons: ["ok"],
                         })
-                    } else if(data.response == 'error') {
+                    } else if(data.status == 'error') {
                         grid.data.update(row.id,{[column.id]:[oldValue]})
                         dhx.alert({
                             header: "Błąd: brak modyfikacji!",
@@ -185,7 +137,7 @@ fetch('http://localhost:4000/users',
                 })
                 .catch(err => {                    
                     grid.data.update(row.id,{[column.id]:[oldValue]})
-                    throw new Error(err)
+                    if(err == 'Error: 401' || err == 'Error: 403' || String(err).includes('Forbidden')) refresh()
                 })
         })
 
@@ -244,7 +196,9 @@ fetch('http://localhost:4000/users',
                                 })
                             }
                         })
-                        .catch(err => {throw new Error(err)})
+                        .catch(err => {
+                            if(err == 'Error: 401' || err == 'Error: 403' || String(err).includes('Forbidden')) refresh()
+                        })
                 }
             })
         })

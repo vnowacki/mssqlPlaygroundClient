@@ -1,0 +1,37 @@
+@import '../../css/index.css';
+
+.layout-header h1 {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.today {
+    color: #fff;
+}
+
+.today:after {
+    background-color: #ff5252;
+    opacity: 1;
+    z-index: -3;
+}
+
+.list_item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.list_item .avatar {
+    width: 36px;
+    height: 36px;
+}
+.list_item .mdi-avatar {
+    font-size: 36px;
+}
+.list_item .item_name {
+    font-size: 1.1em;
+    font-weight: bold;
+}
+.list_item .item_auth {
+    font-size: 0.8em;
+}

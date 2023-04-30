@@ -1,7 +1,44 @@
 const token = window.sessionStorage.getItem('token') ?? ''
-import { refresh } from '/js/refresh.js'
+import { toolbarInit } from '/components/toolbar.js'
+import { formInit } from '/components/form.js'
 
-const config = {
+const toolbar_config = [
+    {
+        id: "users",
+        icon: "dxi dxi-arrow-left",
+        value: ""
+    },
+    {
+        type: "separator"
+    },
+    {
+        type: "title",
+        value: "Dodawanie nowego użytkownika"
+    },
+    {
+        type: "spacer"
+    },
+    {
+        id: "user",
+        value: "",
+        icon: "mdi mdi-account-circle",
+        items: [
+            {
+                type: "title",
+                id: "lastLogged",
+                value: "",
+                icon: "mdi mdi-clock",
+            },
+            {
+                id: "logout",
+                "value": "wyloguj",
+                icon: "mdi mdi-logout",
+            }
+        ]
+    }
+]
+
+const form_config = {
     width: "500px",
     css: "dhx_widget--bg_white dhx_layout-cell--bordered",
     padding: 40,
@@ -55,6 +92,15 @@ const config = {
             successMessage: "Poprawne",
         },
         {
+            type: "simpleVault",
+            name: "picture",
+            label: "Zdjęcie profilowe",
+            labelPosition: "top",
+            disabled: false,
+            required: false,
+            errorMessage: "Błąd"
+        },
+        {
             name: "permLevel",
             type: "checkbox",
             text: "Administrator",
@@ -62,7 +108,7 @@ const config = {
             labelWidth: 140,
             labelPosition: "top",
             helpMessage: "Uprawnienia administratora pozwalają na zarządzanie kontami użytkowników.",
-            value: "admin",
+            value: "admin"
         },
         {
             align: "end",
@@ -91,49 +137,10 @@ const config = {
     ]
 };
 
-const form = new dhx.Form("form", config);
-
-form.events.on("click", function (id) {
-    if(id == 'send' && form.validate()) {
-        fetch('http://localhost:4000/users', {
-            method: 'post',
-            headers: {
-                "Content-Type" : "application/json",
-                "Authorization": `Bearer ${token}`
-            },
-            body: JSON.stringify(form.getValue())
-        })
-        .then(response => response.json())
-        .then(data => {
-            if(data.response == 'error') {
-                dhx.alert({
-                    header: "Błąd",
-                    text: "Nie udało się zapisać danych.",
-                    buttonsAlignment: "center",
-                    buttons: ["ok"],
-                });
-            } else if(data.response == 'userExists') {
-                dhx.alert({
-                    header: "Błąd: nazwa jest zajęta!",
-                    text: "Istnieje już użytkownik o podanej nazwie.",
-                    buttonsAlignment: "center",
-                    buttons: ["ok"],
-                });
-            } else if(data.response == 'accessDenied') {
-                dhx.alert({
-                    header: "Błąd: brak uprawnień!",
-                    text: "Posiadane uprawnienia nie są wystarczające do wykonania tej operacji.",
-                    buttonsAlignment: "center",
-                    buttons: ["ok"],
-                });
-            } else if(data.response == 'userAdded') {
-                window.location.href = '/users'
-            }
-        })
-        .catch(err => {
-            console.log(err)
-            refresh()
-        })
-    }
-    if(id == 'cancel') window.location.href = '/users'
+const toolbar = new dhx.Toolbar("toolbar", {
+    css:"dhx_widget--bordered", data: toolbar_config
 })
+const form = new dhx.Form("form", form_config)
+
+toolbarInit(toolbar)
+formInit(form)
