@@ -272,7 +272,7 @@ fetch('http://localhost:4000/users',
 
         const editPictureWindow = new dhx.Window({
             width: 440,
-            height: 450,
+            height: 550,
             modal: true,
         })
         const windowLayout = new dhx.Layout(null, {
