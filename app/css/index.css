@@ -12,12 +12,8 @@ body {
 .avatar {
     border: 1px solid #d1d1d1;
     border-radius: 50%;
-    overflow: hidden;
-}
-.avatar img {
-    width: 100%;
-    height: 100%;
     object-fit: cover;
+    overflow: hidden;
 }
 
 .dhx_toolbar-button__html {

@@ -1,6 +1,5 @@
 const token = window.sessionStorage.getItem('token') ?? ''
 import { refresh } from '/js/refresh.js'
-import { getBlobData } from '/js/blob.js'
 
 const formInit = (object) => {
     object.events.on("click", id => {

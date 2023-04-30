@@ -1,6 +1,7 @@
 const token = window.sessionStorage.getItem('token') ?? ''
 import { refresh } from '/js/refresh.js'
 import { toolbarInit } from '/components/toolbar.js'
+import { formInit } from '/components/form.js'
 
 const toolbar_config = [
     {
@@ -37,6 +38,51 @@ const toolbar_config = [
         ]
     }
 ]
+
+const editPictureFormConfig = {
+    padding: 0,
+    rows: [
+        {
+            id: "id",
+            type: "input",
+            name: "id",
+            hidden: true
+        },
+        {
+            id: "picture",
+            type: "simpleVault",
+            name: "picture",
+            label: "Nowe zdjęcie profilowe",
+            labelPosition: "top",
+            disabled: false,
+            required: false,
+            errorMessage: "Błąd"
+        },
+        {
+            align: "end",
+            cols: [
+                {
+                    id: "remove-button",
+                    type: "button",
+                    text: "Usuń zdjęcie",
+                    icon: "mdi mdi-delete-forever",
+                    color: "danger",
+                    circle: true,
+                },
+                {
+                    type: "spacer"
+                },
+                {
+                    id: "apply-button",
+                    type: "button",
+                    text: "Zapisz zdjęcie",              
+                    icon: "mdi mdi-check",
+                    circle: true,
+                }
+            ]
+        }
+    ]
+}
   
 const toolbar = new dhx.Toolbar("toolbar", {
     css:"dhx_widget--bordered", data: toolbar_config
@@ -58,6 +104,17 @@ fetch('http://localhost:4000/users',
     .then(dataset => {
         const grid = new dhx.Grid("dataContainer", {
 			columns: [
+                { 
+                    minWidth: 100,
+                    id: "picture",
+                    header: [{ text: "Zdjęcie" }],
+                    tooltipTemplate: () => {return 'edytuj zdjęcie'},
+                    align: "center",
+                    htmlEnable: true,
+                    template: (picture, row, col) => {
+                        return `<a class="edit-picture">${(picture) ? `<img class="avatar avatar-grid" src="${picture}">` : `brak`}</a>`
+                    }
+                },
 				{ minWidth: 200, id: "name", header: [{ text: "Imię" }] },
 				{ minWidth: 200, id: "surname", header: [{ text: "Nazwisko" }] },
                 { minWidth: 200, id: "username", header: [{ text: "Nazwa użytkownika" }] },
@@ -65,6 +122,13 @@ fetch('http://localhost:4000/users',
                 { minWidth: 200, id: "date_logged", header: [{ text: "Ostatnie logowanie" }] },
                 { minWidth: 200, id: "date_created", header: [{ text: "Data utworzenia konta" }], type: "date", format: "%d/%m/%Y" }
 			],
+            eventHandlers: {
+                onclick: {
+                    "edit-picture": (e, data) => {
+                        openPictureEditor(data.row.id)
+                    }
+                }
+            },
 			data: dataset,
             autoWidth: true,
             selection: "row",
@@ -79,7 +143,7 @@ fetch('http://localhost:4000/users',
             oldValue = row[column.id]
         })
         grid.events.on("beforeEditStart", (row, column, editorType) => {
-            if(column.id == 'date_logged' || column.id == 'date_created') return false
+            if(column.id == 'date_logged' || column.id == 'date_created' || column.id == 'picture') return false
         })
         grid.events.on("afterEditEnd", (value, row, column) => {
             row.permLevel = (row.admin) ? 'admin' : 'read'
@@ -205,6 +269,94 @@ fetch('http://localhost:4000/users',
         document.querySelector("#add").addEventListener("click", function () {
             window.location.href = '/users/add'
         })
+
+        const editPictureWindow = new dhx.Window({
+            width: 440,
+            height: 450,
+            modal: true,
+        })
+        const windowLayout = new dhx.Layout(null, {
+            type: "none",
+            rows: [
+                {id: "actual-picture", height: "auto"},
+                {id: "form"}
+            ]
+        })
+        editPictureWindow.attach(windowLayout)
+        
+        const editPictureForm = new dhx.Form(null, editPictureFormConfig)
+        const openPictureEditor = (id) => {
+            editPictureWindow.show()
+            editPictureForm.getItem("id").setValue(id)
+            if((grid.data.getItem(id).picture)) editPictureForm.getItem("remove-button").show()
+            else editPictureForm.getItem("remove-button").hide()
+            let html = `<div class="avatar-window-container"><legend class="dhx_label">Aktualne zdjęcie</legend>${(grid.data.getItem(id).picture) ? `<img class="avatar avatar-window" src="${grid.data.getItem(id).picture}">` : `brak`}</div>`
+            windowLayout.getCell("actual-picture").attachHTML(html)
+        }
+        editPictureForm.getItem("remove-button").events.on("click", () => {
+            const data = editPictureForm.getValue()
+            fetch(`http://localhost:4000/users/${data.id}/picture`, {
+                method: 'delete',
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            })
+            .then(response => {
+                if(response.ok) {
+                    editPictureWindow.hide()
+                    window.location.href = '/users'
+                }
+                else {
+                    dhx.alert({
+                        header: "Błąd: usunięto zdjęcia!",
+                        text: "Zdjęcie profilowe nie zostało usunięte.",
+                        buttonsAlignment: "center",
+                        buttons: ["ok"],
+                    })
+                }
+            })
+            .catch(err => console.log(err))
+        })
+        editPictureForm.getItem("apply-button").events.on("click", () => {
+            const data = editPictureForm.getValue()
+            const picture = data.picture
+            if(picture.length) {
+                let formData = new FormData()
+                formData.append('picture', picture[0].file)
+                fetch(`http://localhost:4000/users/${data.id}/picture`, {
+                    method: 'put',
+                    headers: {
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: formData
+                })
+                .then(response => {
+                    if(response.ok) {
+                        editPictureWindow.hide()
+                        window.location.href = '/users'
+                    }
+                    else {
+                        dhx.alert({
+                            header: "Błąd: nie zapisano zdjęcia!",
+                            text: "Zdjęcie profilowe nie zostało zapisane.",
+                            buttonsAlignment: "center",
+                            buttons: ["ok"],
+                        })
+                    }
+                })
+                .catch(err => console.log(err))
+            }
+            else {
+                dhx.alert({
+                    header: "Błąd: brak zdjęcia!",
+                    text: "Nie dokonano wyboru zdjęcia.",
+                    buttonsAlignment: "center",
+                    buttons: ["ok"],
+                })
+            }
+        })
+        windowLayout.getCell('form').attach(editPictureForm)
+        formInit(editPictureForm)
     })
     .catch(err => {
         if(err == 'Error: 401' || err == 'Error: 403' || String(err).includes('Forbidden')) refresh()
