@@ -1,3 +1,5 @@
+import { formInit } from '/components/form.js'
+
 const config = {
     width: "400px",
     css: "dhx_widget--bg_white dhx_layout-cell--bordered",
@@ -33,41 +35,8 @@ const config = {
             ]
         },
     ]
-};
+}
 
-const form = new dhx.Form("form", config);
+const form = new dhx.Form("form", config)
 
-form.events.on("click", function (id) {
-    if(id == 'send' && form.validate()) {
-        fetch('http://localhost:4000/auth', {
-            method: 'post',
-            headers: {
-                "Content-Type" : "application/json"
-            },
-            body: JSON.stringify(form.getValue())
-        })
-        .then(response => response.json())
-        .then(data => {
-            if(data.response == 'error') {
-                dhx.alert({
-                    header: "Błąd",
-                    text: "Nieprawidłowy login lub hasło",
-                    buttonsAlignment: "center",
-                    buttons: ["ok"],
-                });
-            } else {
-                window.sessionStorage.setItem('token', data.accessToken)
-                window.sessionStorage.setItem('refreshToken', data.refreshToken)
-                window.location.href = '/'
-            }
-        })
-        .catch(err => {
-            dhx.alert({
-                header: "Błąd",
-                text: `Kod błędu: ${err}`,
-                buttonsAlignment: "center",
-                buttons: ["ok"],
-            });
-        })
-    }
-})
+formInit(form, { url: "http://localhost:4000/auth", method: "POST", returnPath: '/' })

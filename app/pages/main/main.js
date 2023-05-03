@@ -2,7 +2,7 @@ const token = window.sessionStorage.getItem('token') ?? ''
 import { toolbarInit } from '/components/toolbar.js'
 import { sidebarInit } from '/components/sidebar.js'
 import { menuInit } from '/components/menu.js'
-import { listInit, listTemplate } from '/components/list.js'
+import { listInit, usersTemplate, productsTemplate } from '/components/list.js'
 
 const layout_config = {
     width:"100%", height:"100%",
@@ -39,34 +39,6 @@ const layout_config = {
     ]
 }
 
-const toolbar_config = [
-    {
-        type: "title",
-        value: "DHTMLX Playground"
-    },
-    {
-        type: "spacer"
-    },
-    {
-        id: "user",
-        value: "",
-        icon: "mdi mdi-account-circle",
-        items: [
-            {
-                type: "title",
-                id: "lastLogged",
-                value: "",
-                icon: "mdi mdi-clock",
-            },
-            {
-                id: "logout",
-                "value": "wyloguj",
-                icon: "mdi mdi-logout",
-            }
-        ]
-    }
-]
-
 const sidebar_config = [
     { 
         id: "users", 
@@ -89,14 +61,14 @@ const tabbar_config = {
     mode: "top",
     views: [
         {
-            id: "orders",
-            tab: "zamówienia",
-            html: `zamówienia`
-        },
-        {
             id: "products",
             tab: "produkty",
             html: `produkty`
+        },
+        {
+            id: "orders",
+            tab: "zamówienia",
+            html: `zamówienia`
         }
     ]
 }
@@ -137,23 +109,20 @@ const menu_config = [
 ]
   
 const layout = new dhx.Layout("layout", layout_config)
-const toolbar = new dhx.Toolbar("toolbar", { data: toolbar_config })
 const sidebar = new dhx.Sidebar("sidebar", { width: "100%", data: sidebar_config })
 const tabbar = new dhx.Tabbar("content", tabbar_config)
 const asideLayout = new dhx.Layout("rightbar", aside_layout_config)
 const calendar = new dhx.Calendar("calendar", calendar_config)
-const list = new dhx.List("list", { template: listTemplate })
 const menu = new dhx.Menu("footer", { data: menu_config })
 
-layout.getCell("toolbar").attach(toolbar)
+layout.getCell("toolbar").attach(toolbarInit({ title: "DHTMLX Playground" }))
 layout.getCell("sidebar").attach(sidebar)
 layout.getCell("content").attach(tabbar)
 layout.getCell("rightbar").attach(asideLayout)
 layout.getCell("footer").attach(menu)
 asideLayout.getCell("calendar").attach(calendar)
-asideLayout.getCell("list").attach(list)
+asideLayout.getCell("list").attach(listInit({ url: "http://localhost:4000/users", method: "GET" }, usersTemplate))
+tabbar.getCell("products").attach(listInit({ url: "http://localhost:4000/products", method: "GET" }, productsTemplate))
 
-toolbarInit(toolbar)
 sidebarInit(sidebar)
-listInit(list)
 menuInit(menu)

@@ -7,6 +7,12 @@ const router = (requestUrl) => {
           case '/users/add':
                file = './pages/users/add.html'
                break
+          case '/products':
+               file = './pages/products/products.html'
+               break
+          case '/products/add':
+               file = './pages/products/add.html'
+               break
           case '/login':
                file = './pages/login/login.html'
                break

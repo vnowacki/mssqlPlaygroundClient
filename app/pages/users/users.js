@@ -3,42 +3,6 @@ import { refresh } from '/js/refresh.js'
 import { toolbarInit } from '/components/toolbar.js'
 import { formInit } from '/components/form.js'
 
-const toolbar_config = [
-    {
-        id: "home",
-        icon: "dxi dxi-arrow-left",
-        value: ""
-    },
-    {
-        type: "separator"
-    },
-    {
-        type: "title",
-        value: "Zarządzanie użytkownikami"
-    },
-    {
-        type: "spacer"
-    },
-    {
-        id: "user",
-        value: "",
-        icon: "mdi mdi-account-circle",
-        items: [
-            {
-                type: "title",
-                id: "lastLogged",
-                value: "",
-                icon: "mdi mdi-clock",
-            },
-            {
-                id: "logout",
-                "value": "wyloguj",
-                icon: "mdi mdi-logout",
-            }
-        ]
-    }
-]
-
 const editPictureFormConfig = {
     padding: 0,
     rows: [
@@ -84,10 +48,7 @@ const editPictureFormConfig = {
     ]
 }
   
-const toolbar = new dhx.Toolbar("toolbar", {
-    css:"dhx_widget--bordered", data: toolbar_config
-})
-toolbarInit(toolbar)
+const toolbar = toolbarInit({ returnPath: '/', css: "dhx_widget--bordered", title: "Zarządzanie użytkownikami" })
 
 fetch('http://localhost:4000/users', 
     {
@@ -205,7 +166,7 @@ fetch('http://localhost:4000/users',
                 })
         })
 
-        document.querySelector("#remove").addEventListener("click", function () {
+        document.querySelector("#remove").addEventListener("click", () => {
             dhx.confirm({
                 header: "Uwaga",
                 text: "Potwierdź usunięcie użytkownika.",
@@ -214,7 +175,7 @@ fetch('http://localhost:4000/users',
                 escClose: true,
             }).then((confirm) => { 
                 if(!confirm) return
-                const cell = grid.selection.getCell();
+                const cell = grid.selection.getCell()
                 if (cell.row) {
                     fetch(`http://localhost:4000/users/${cell.row.id}`, 
                         {
@@ -226,7 +187,7 @@ fetch('http://localhost:4000/users',
                         })
                         .then(response => response.json())
                         .then(data => {
-                            if(data.response == 'success') grid.data.remove(cell.row.id);
+                            if(data.response == 'success') grid.data.remove(cell.row.id)
                             else if(data.response == 'accessDenied') {
                                 dhx.alert({
                                     header: "Błąd: brak uprawnień!",
@@ -266,7 +227,7 @@ fetch('http://localhost:4000/users',
                 }
             })
         })
-        document.querySelector("#add").addEventListener("click", function () {
+        document.querySelector("#add").addEventListener("click", () => {
             window.location.href = '/users/add'
         })
 
@@ -356,7 +317,7 @@ fetch('http://localhost:4000/users',
             }
         })
         windowLayout.getCell('form').attach(editPictureForm)
-        formInit(editPictureForm)
+        formInit(editPictureForm, { url: "http://localhost:4000/users", method: "POST", returnPath: "/users" })
     })
     .catch(err => {
         if(err == 'Error: 401' || err == 'Error: 403' || String(err).includes('Forbidden')) refresh()

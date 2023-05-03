@@ -1,7 +1,7 @@
 const token = window.sessionStorage.getItem('token') ?? ''
 import { refresh } from '/js/refresh.js'
 
-const listTemplate = ({ name, surname, admin, picture }) => {
+const usersTemplate = ({ name, surname, admin, picture }) => {
     let avatar = (picture) ? `<img class="avatar" src="${picture}" alt="avatar">` : `<span class="mdi mdi-account-circle mdi-avatar"></span>`
     let template = 
         `<div class='list_item'>
@@ -12,12 +12,24 @@ const listTemplate = ({ name, surname, admin, picture }) => {
             </div>
         </div>`
     return template
-};
+}
 
-const listInit = (object) => {
-    fetch('http://localhost:4000/users', 
+const productsTemplate = ({ name, price, category }) => {
+    let template = 
+        `<div class='list_item'>
+            <div>
+                <div class='item_name'>${name}</div>
+                <div class='item_auth'>cena: <strong>${price} PLN</strong> | kategoria: ${category}</div>
+            </div>
+        </div>`
+    return template
+}
+
+const listInit = (options, template) => {
+    const object = new dhx.List(null, { template: template })
+    fetch(options.url, 
     {
-        method: "GET",
+        method: options.method,
         headers: {
             "Content-Type" : "application/json",
             "Authorization": `Bearer ${token}`
@@ -28,11 +40,12 @@ const listInit = (object) => {
         return response.json()
     })
     .then(dataset => {
-        object.data.parse(dataset);
+        object.data.parse(dataset)
     })
     .catch(err => {
         if(err == 'Error: 401' || err == 'Error: 403' || String(err).includes('Forbidden')) refresh()
     })
+    return object
 }
 
-export { listInit, listTemplate }
+export { listInit, usersTemplate, productsTemplate }

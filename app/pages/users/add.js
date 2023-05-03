@@ -2,42 +2,6 @@ const token = window.sessionStorage.getItem('token') ?? ''
 import { toolbarInit } from '/components/toolbar.js'
 import { formInit } from '/components/form.js'
 
-const toolbar_config = [
-    {
-        id: "users",
-        icon: "dxi dxi-arrow-left",
-        value: ""
-    },
-    {
-        type: "separator"
-    },
-    {
-        type: "title",
-        value: "Dodawanie nowego użytkownika"
-    },
-    {
-        type: "spacer"
-    },
-    {
-        id: "user",
-        value: "",
-        icon: "mdi mdi-account-circle",
-        items: [
-            {
-                type: "title",
-                id: "lastLogged",
-                value: "",
-                icon: "mdi mdi-clock",
-            },
-            {
-                id: "logout",
-                "value": "wyloguj",
-                icon: "mdi mdi-logout",
-            }
-        ]
-    }
-]
-
 const form_config = {
     width: "500px",
     css: "dhx_widget--bg_white dhx_layout-cell--bordered",
@@ -71,8 +35,8 @@ const form_config = {
             name: "password",
             value: "",
             required: true,
-            validation: function(value) {
-                return value && value.length >= 8;
+            validation: (value) => {
+                return value && value.length >= 8
             },
             errorMessage: "Za krótkie",
             successMessage: "Poprawne",
@@ -85,7 +49,7 @@ const form_config = {
             name: "passwordR",
             value: "",
             required: true,
-            validation: function(value) {
+            validation: (value) => {
                 return value && value === form.getItem("password").getValue()
             },
             errorMessage: "Hasła nie są takie same",
@@ -135,12 +99,9 @@ const form_config = {
             ]
         },
     ]
-};
+}
 
-const toolbar = new dhx.Toolbar("toolbar", {
-    css:"dhx_widget--bordered", data: toolbar_config
-})
+const toolbar = toolbarInit({ returnPath: '/users', css: "dhx_widget--bordered", title: "Dodawanie nowego użytkownika" })
+
 const form = new dhx.Form("form", form_config)
-
-toolbarInit(toolbar)
-formInit(form)
+formInit(form, { url: "http://localhost:4000/users", method: "POST", returnPath: "/users" })

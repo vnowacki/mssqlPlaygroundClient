@@ -1,7 +1,41 @@
 const token = window.sessionStorage.getItem('token') ?? ''
 import { refresh } from '/js/refresh.js'
 
-const toolbarInit = (object) => {
+const toolbarInit = (options) => {
+    const toolbar_config = [
+        {
+            type: "title",
+            value: options.title
+        },
+        {
+            type: "spacer"
+        },
+        {
+            id: "user",
+            value: "",
+            icon: "mdi mdi-account-circle",
+            items: [
+                {
+                    type: "title",
+                    id: "lastLogged",
+                    value: "",
+                    icon: "mdi mdi-clock",
+                },
+                {
+                    id: "logout",
+                    "value": "wyloguj",
+                    icon: "mdi mdi-logout",
+                }
+            ]
+        }
+    ]
+
+    if(options.returnPath) {
+        toolbar_config.unshift({ type: "separator" })
+        toolbar_config.unshift({ id: "return", icon: "dxi dxi-arrow-left", value: "" })
+    }
+
+    const object = new dhx.Toolbar("toolbar", { data: toolbar_config, css: options.css })
     fetch('http://localhost:4000/users/info', 
         {
             method: "GET",
@@ -55,9 +89,9 @@ const toolbarInit = (object) => {
                     })
                 })
         }
-        if(id == 'home') window.location.href = '/'
-        if(id == 'users') window.location.href = '/users'
+        if(id == 'return') window.location.href = options.returnPath
     })
+    return object
 }
 
 export { toolbarInit }
